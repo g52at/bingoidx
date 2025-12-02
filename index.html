@@ -10,8 +10,8 @@
     <div class="text-outline" id="logs"></div>
 </body>
 <script>
-    //const audio = new Audio('ドラムの音.mp3');
-    //const audio2 = new Audio('じゃーん.mp3');
+    const audio = new Audio('ドラムロール.mp3');
+    const audio2 = new Audio('じゃーん.mp3');
     var bingo_max = 75;//ビンゴの最大値
     let refleshlate = 10; //速度
     let i = 0;
@@ -23,8 +23,11 @@
     var drum_flag = true;
     var bingo_botton = document.getElementById('bingo_botton').textContent;
     let text = document.getElementById('slot_zone').textContent;
-    var btn0 = document.getElementById('start_animation');
-    var btn1 = document.getElementById('bingo_botton');
+    const btn0 = document.getElementById('start_animation');
+    const btn1 = document.getElementById('bingo_botton');
+    const spacekey = document.querySelector('body');
+
+
     function randomizing(){//ビンゴの乱数を配列で出力
         var arr = [];
         bingo_array = []; 
@@ -39,37 +42,65 @@
         }
         index = 0;
     }
+    document.addEventListener("keydown", keyDownHandler, false);
 
-    btn0.addEventListener('click', () => {//開始ボタンを押した時の動作
+    function keyDownHandler(e) {
+        if(e.key == " "){
+            if(!slot_state){//スロット動作中
+                start_slot();
+            }
+            else{
+                stop_slot();
+            }
+        }   
+    }
+
+//スロットスタート時の動作
+    function start_slot() {
         timerId = 0;
-        //audio.play();
+        audio.play();
         if (!slot_state){
             sayHello();
         };
         slot_state = true;
-    });
-
-    btn1.addEventListener('click',function(){//停止ボタンを押した時の動作
+    }
+//スロット停止時の操作
+    function stop_slot(){
         if (!slot_state) return;
-        //audio.pause();
-        //audio2.play();
+        audio.pause();
+        audio.currentTime = 0;
+        setTimeout(function(){
+            audio2.play();
+        },100);
         window.clearTimeout(timerId);
-        get_bingo();
+        bingo_main();
         slot_state = false;
-    });
+    }
 
+//ブラウザ上の開始ボタンを押した時の動作
+    btn0.addEventListener('click', () => {
+        start_slot();
+    });
+    
+//ブラウザ上の停止ボタンを押した時の動作
+    btn1.addEventListener('click',function(){
+        stop_slot(); 
+    });
+    
     function sayHello(){//表示を担う
-        //audio.play();
         let slot_number = Math.floor(Math.random() * 100);
         document.getElementById('slot_zone').textContent = slot_number;
-        timerId = setTimeout(sayHello,refleshlate);//reflashlateの単位で実行するので頻度を調整できる
+        audio.play();
+        timerId = setTimeout(sayHello,refleshlate);
 
     }
 
-    function get_bingo(){//ビンゴのメイン処理
+    function bingo_main(){//ビンゴのメイン処理
         if(bingo_array[index] === undefined){//今の抽選結果
             alert("抽選終了！");
-        }else{  //当選したログを表示
+//当選済みの数字の追加
+        }
+        else{ 
             const bingo_log_base = document.getElementById("logs");
             const bingo_log_element = document.createElement("result");
             const textnode = document.createTextNode(bingo_array[index]);
@@ -83,22 +114,12 @@
         }
     }
 /*
-    function reset_check(){//リセットボタンの動作
-        if (confirm("ビンゴの中身をリセットしますか？")){
-            randomizing();
-            alert("リセット完了しました。")
-         }
-        timerId = 0;
-        slot_state = false;
-    }
-*/
-//キーボード入力
     const keyzone = document.querySelector('body');
     document.addEventListener('keydown',(e) => {
         if(slot_state == true){//ビンゴ停止と同じ
             if (!slot_state) return;
             window.clearTimeout(timerId);
-            get_bingo();
+            bingo_main();
             slot_state = false;
         }else if(slot_state == false){//ビンゴ開始と同じ
                 timerId = 0;
@@ -108,20 +129,19 @@
             slot_state = true;
         }
     });
-
+*/
+    
+//関数の外
     document.getElementById("slot_zone").innerHTML = 'OK!';
     window.onload = randomizing();// 自動実行
     </script>
     <style>
         *{
-            font-size: large;
             font-family: "Nikukyu";
             background-color: #18233F;
             text-align: center;
-
         }
         .text-outline{
-          color:aliceblue;
           text-shadow: 
             -1px -1px 0 #FFFFFF,
             1px -1px 0 #FFFFFF,
@@ -129,7 +149,16 @@
             1px 1px 0 #FFFFFF;
         }
         #slot_zone{
+          font-size: 200px;
           color: black;
+          border-radius: 40px;        
+          background-color: #FFC93C;
+          font-weight: bold;
+          text-shadow: 
+            -3px -3px 0 #FFFFFF,
+            3px -3px 0 #FFFFFF,
+            -3px 3px 0 #FFFFFF,
+            3px 3px 0 #FFFFFF;
         }
         button{
             padding: 20px;
@@ -141,11 +170,9 @@
         #bingo_botton{
             background-color: deeppink;
         }
-        #reset_botton{
-            background-color: aquamarine;
-        }
+
         result{
-            font-size: 30 px;
+            font-size: 80px;
             display: inline-block;
             margin-left: 10px;
             padding: 12px;
@@ -154,8 +181,6 @@
             border-radius: 40px;
             font-weight: bold;
         }
-        #slot_zone{
-            font-size: 100px;
-        }
+
     </style>
 </html>
