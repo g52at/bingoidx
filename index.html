@@ -1,14 +1,150 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+<link href="https://fonts.googleapis.com/earlyaccess/nikukyu.css" rel="stylesheet">
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+    <p id="slot_zone"></p>
+    <button id="start_animation">スタート</button>
+    <button id="bingo_botton">ストップ</button>
+    <p id="logs"></p>
 </body>
+<script>
+    const audio = new Audio('ドラムの音.mp3');
+    const audio2 = new Audio('じゃーん.mp3');
+    var bingo_max = 75;//ビンゴの最大値
+    let refleshlate = 10; //速度
+    let i = 0;
+    let timerId;
+    var index = 0;
+    var bingo_array;
+    var before_bingo = 0;
+    var slot_state = false;
+    var drum_flag = true;
+    let bingo_botton = document.getElementById('bingo_botton').textContent;
+    let text = document.getElementById('slot_zone').textContent;
+    var btn0 = document.getElementById('start_animation');
+    var btn1 = document.getElementById('bingo_botton');
+    function randomizing(){//ビンゴの乱数を配列で出力
+        var arr = [];
+        bingo_array = []; 
+        for(var i=0; i < bingo_max; i++){
+            arr[i]=i+1;
+        }
+    
+        for(var j = 0, len = arr.length; j < bingo_max; j++, len--) {
+            rndNum = Math.floor(Math.random()*len);
+            bingo_array.push(arr[rndNum]);
+            arr[rndNum] = arr[len-1];
+        }
+        index = 0;
+    }
+
+    btn0.addEventListener('click', () => {//開始ボタンを押した時の動作
+        timerId = 0;
+        audio.play();
+        if (!slot_state){
+            sayHello();
+        };
+        slot_state = true;
+    });
+
+    btn1.addEventListener('click',function(){//停止ボタンを押した時の動作
+        if (!slot_state) return;
+        audio.pause();
+        audio2.play();
+        window.clearTimeout(timerId);
+        get_bingo();
+        slot_state = false;
+    });
+
+    function sayHello(){//表示を担う
+        audio.play();
+        let slot_number = Math.floor(Math.random() * 100);
+        document.getElementById('slot_zone').textContent = slot_number;
+        timerId = setTimeout(sayHello,refleshlate);//reflashlateの単位で実行するので頻度を調整できる
+
+    }
+
+    function get_bingo(){//ビンゴのメイン処理
+        if(bingo_array[index] === undefined){//今の抽選結果
+            alert("抽選終了！");
+        }else{  //当選したログを表示
+            const bingo_log_base = document.getElementById("logs");
+            const bingo_log_element = document.createElement("result");
+            const textnode = document.createTextNode(bingo_array[index]);
+            bingo_log_element.appendChild(textnode);
+            bingo_log_base.appendChild(bingo_log_element);
+        }
+        document.getElementById('slot_zone').textContent = bingo_array[index];
+        before_bingo = bingo_array[index];
+        bingo_array.shift();
+        if (bingo_array.length < index){
+        }
+    }
+/*
+    function reset_check(){//リセットボタンの動作
+        if (confirm("ビンゴの中身をリセットしますか？")){
+            randomizing();
+            alert("リセット完了しました。")
+         }
+        timerId = 0;
+        slot_state = false;
+    }
+*/
+//キーボード入力
+    const keyzone = document.querySelector('body');
+    document.addEventListener('keydown',(e) => {
+        if(slot_state == true){//ビンゴ停止と同じ
+            if (!slot_state) return;
+            window.clearTimeout(timerId);
+            get_bingo();
+            slot_state = false;
+        }else if(slot_state == false){//ビンゴ開始と同じ
+                timerId = 0;
+            if (!slot_state){
+                sayHello();
+            };
+            slot_state = true;
+        }
+    });
+
+    document.getElementById("slot_zone").innerHTML = 'OK!';
+    window.onload = randomizing();// 自動実行
+    </script>
+    <style>
+        *{
+            font-size: large;
+            font-family: "Nikukyu";
+            background-color: lightyellow;
+            text-align: center;
+
+        }
+        button{
+            padding: 20px;
+            border-radius: 10px;
+        }
+        #start_animation{
+            background-color: cornflowerblue;
+        }
+        #bingo_botton{
+            background-color: deeppink;
+        }
+        #reset_botton{
+            background-color: aquamarine;
+        }
+        result{
+            font-size: 30 px;
+            display: inline-block;
+            margin-left: 10px;
+            padding: 12px;
+            color: black;
+            background-color: orange;
+            border-radius: 40px;
+            font-weight: bold;
+        }
+        #slot_zone{
+            font-size: 100px;
+        }
+    </style>
 </html>
