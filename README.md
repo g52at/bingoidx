@@ -1,1 +1,1 @@
-A simple HTML/JS/CSS starter template
+HTML5で動く簡単なビンゴです、chromebookなどブラウザしか動かない状況でも動きます。
