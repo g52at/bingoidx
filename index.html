@@ -4,14 +4,14 @@
 <link href="https://fonts.googleapis.com/earlyaccess/nikukyu.css" rel="stylesheet">
 </head>
 <body>
-    <p id="slot_zone"></p>
+    <div class="text-outline" id="slot_zone"></div>
     <button id="start_animation">スタート</button>
     <button id="bingo_botton">ストップ</button>
-    <p id="logs"></p>
+    <div class="text-outline" id="logs"></div>
 </body>
 <script>
-    const audio = new Audio('ドラムの音.mp3');
-    const audio2 = new Audio('じゃーん.mp3');
+    //const audio = new Audio('ドラムの音.mp3');
+    //const audio2 = new Audio('じゃーん.mp3');
     var bingo_max = 75;//ビンゴの最大値
     let refleshlate = 10; //速度
     let i = 0;
@@ -21,7 +21,7 @@
     var before_bingo = 0;
     var slot_state = false;
     var drum_flag = true;
-    let bingo_botton = document.getElementById('bingo_botton').textContent;
+    var bingo_botton = document.getElementById('bingo_botton').textContent;
     let text = document.getElementById('slot_zone').textContent;
     var btn0 = document.getElementById('start_animation');
     var btn1 = document.getElementById('bingo_botton');
@@ -42,7 +42,7 @@
 
     btn0.addEventListener('click', () => {//開始ボタンを押した時の動作
         timerId = 0;
-        audio.play();
+        //audio.play();
         if (!slot_state){
             sayHello();
         };
@@ -51,15 +51,15 @@
 
     btn1.addEventListener('click',function(){//停止ボタンを押した時の動作
         if (!slot_state) return;
-        audio.pause();
-        audio2.play();
+        //audio.pause();
+        //audio2.play();
         window.clearTimeout(timerId);
         get_bingo();
         slot_state = false;
     });
 
     function sayHello(){//表示を担う
-        audio.play();
+        //audio.play();
         let slot_number = Math.floor(Math.random() * 100);
         document.getElementById('slot_zone').textContent = slot_number;
         timerId = setTimeout(sayHello,refleshlate);//reflashlateの単位で実行するので頻度を調整できる
@@ -116,9 +116,20 @@
         *{
             font-size: large;
             font-family: "Nikukyu";
-            background-color: lightyellow;
+            background-color: #18233F;
             text-align: center;
 
+        }
+        .text-outline{
+          color:aliceblue;
+          text-shadow: 
+            -1px -1px 0 #FFFFFF,
+            1px -1px 0 #FFFFFF,
+            -1px 1px 0 #FFFFFF,
+            1px 1px 0 #FFFFFF;
+        }
+        #slot_zone{
+          color: black;
         }
         button{
             padding: 20px;
@@ -139,7 +150,7 @@
             margin-left: 10px;
             padding: 12px;
             color: black;
-            background-color: orange;
+            background-color: #FFC93C;
             border-radius: 40px;
             font-weight: bold;
         }
