@@ -71,7 +71,7 @@
         audio.currentTime = 0;
         setTimeout(function(){
             audio2.play();
-        },100);
+        },10);
         window.clearTimeout(timerId);
         bingo_main();
         slot_state = false;
@@ -83,8 +83,8 @@
     });
     
 //ブラウザ上の停止ボタンを押した時の動作
-    btn1.addEventListener('click',function(){
-        stop_slot(); 
+    btn1.addEventListener('click', () => {
+        stop_slot();
     });
     
     function sayHello(){//表示を担う
@@ -113,24 +113,7 @@
         if (bingo_array.length < index){
         }
     }
-/*
-    const keyzone = document.querySelector('body');
-    document.addEventListener('keydown',(e) => {
-        if(slot_state == true){//ビンゴ停止と同じ
-            if (!slot_state) return;
-            window.clearTimeout(timerId);
-            bingo_main();
-            slot_state = false;
-        }else if(slot_state == false){//ビンゴ開始と同じ
-                timerId = 0;
-            if (!slot_state){
-                sayHello();
-            };
-            slot_state = true;
-        }
-    });
-*/
-    
+ 
 //関数の外
     document.getElementById("slot_zone").innerHTML = 'OK!';
     window.onload = randomizing();// 自動実行
