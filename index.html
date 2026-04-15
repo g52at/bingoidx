@@ -1,165 +1,135 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<link href="https://fonts.googleapis.com/earlyaccess/nikukyu.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/earlyaccess/nikukyu.css" rel="stylesheet">
+    <style>
+        * {
+            font-family: "Nikukyu", sans-serif;
+            background-color: #18233F;
+            text-align: center;
+            color: white; /* テキストを見やすく */
+        }
+        .text-outline {
+            text-shadow: -1px -1px 0 #FFFFFF, 1px -1px 0 #FFFFFF, -1px 1px 0 #FFFFFF, 1px 1px 0 #FFFFFF;
+        }
+        #slot_zone {
+            font-size: 200px;
+            color: black;
+            border-radius: 40px;        
+            background-color: #FFC93C;
+            font-weight: bold;
+            text-shadow: -3px -3px 0 #FFFFFF, 3px -3px 0 #FFFFFF, -3px 3px 0 #FFFFFF, 3px 3px 0 #FFFFFF;
+            margin: 20px auto;
+            width: 300px;
+        }
+        button {
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            border: none;
+            margin: 10px;
+        }
+        #start_animation { background-color: cornflowerblue; color: white; }
+        #bingo_botton { background-color: deeppink; color: white; }
+        
+        /* ログ部分の設定 */
+        #logs { margin-top: 20px; display: flex; flex-wrap: wrap; justify-content: center; }
+        .log-item {
+            font-size: 40px;
+            display: inline-block;
+            margin: 5px;
+            padding: 10px;
+            color: black;
+            background-color: #FFC93C;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div class="text-outline" id="slot_zone"></div>
+    <div class="text-outline" id="slot_zone">OK!</div>
     <button id="start_animation">スタート</button>
     <button id="bingo_botton">ストップ</button>
-    <div class="text-outline" id="logs"></div>
-</body>
+    <div id="logs"></div>
+
 <script>
     const audio = new Audio('ドラムロール.mp3');
     const audio2 = new Audio('じゃーん.mp3');
-    var bingo_max = 75;//ビンゴの最大値
-    let refleshlate = 10; //速度
-    let i = 0;
-    let timerId;
-    var index = 0;
-    var bingo_array;
-    var before_bingo = 0;
-    var slot_state = false;
-    var drum_flag = true;
-    var bingo_botton = document.getElementById('bingo_botton').textContent;
-    let text = document.getElementById('slot_zone').textContent;
-    const btn0 = document.getElementById('start_animation');
-    const btn1 = document.getElementById('bingo_botton');
-    const spacekey = document.querySelector('body');
+    const bingo_max = 75;
+    let refreshRate = 50; // 10msは早すぎるので少し調整
+    let timerId = null;
+    let bingo_array = [];
+    let slot_state = false;
 
-
-    function randomizing(){//ビンゴの乱数を配列で出力
-        var arr = [];
-        bingo_array = []; 
-        for(var i=0; i < bingo_max; i++){
-            arr[i]=i+1;
+    // ビンゴ配列の初期化（フィッシャー・イェーツのシャッフル）
+    function initializeBingo() {
+        let arr = [];
+        for (let i = 1; i <= bingo_max; i++) arr.push(i);
+        for (let i = arr.length - 1; i > 0; i--) {
+            let r = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[r]] = [arr[r], arr[i]];
         }
-    
-        for(var j = 0, len = arr.length; j < bingo_max; j++, len--) {
-            rndNum = Math.floor(Math.random()*len);
-            bingo_array.push(arr[rndNum]);
-            arr[rndNum] = arr[len-1];
-        }
-        index = 0;
-    }
-//スペースキーで動作する
-    document.addEventListener("keydown", keyDownHandler, false);
-    function keyDownHandler(e) {
-        if(e.key == " "){
-            if(!slot_state){//スロット動作中
-                start_slot();
-            }
-            else{
-                stop_slot();
-            }
-        }   
+        bingo_array = arr;
     }
 
-//スロットスタート時の動作
+    function sayHello() {
+        let slot_number = Math.floor(Math.random() * 99) + 1;
+        document.getElementById('slot_zone').textContent = slot_number;
+        timerId = setTimeout(sayHello, refreshRate);
+    }
+
     function start_slot() {
-        timerId = 0;
-        audio.play();
-        if (!slot_state){
-            sayHello();
-        };
+        if (slot_state || bingo_array.length === 0) return; // 動作中または終了時は何もしない
         slot_state = true;
+        audio.loop = true; // ドラムロールをループ
+        audio.play();
+        sayHello();
     }
-//スロット停止時の操作
-    function stop_slot(){
+
+    function stop_slot() {
         if (!slot_state) return;
+        slot_state = false;
+        
+        clearTimeout(timerId);
         audio.pause();
         audio.currentTime = 0;
-        setTimeout(function(){
-            audio2.play();
-        },10);
-        window.clearTimeout(timerId);
+        audio2.play();
+
         bingo_main();
-        slot_state = false;
     }
 
-//ブラウザ上の開始ボタンを押した時の動作
-    btn0.addEventListener('click', () => {
-        start_slot();
+    function bingo_main() {
+        if (bingo_array.length === 0) {
+            alert("全ての抽選が終了しました！");
+            return;
+        }
+
+        const resultNumber = bingo_array.shift(); // 配列から1つ取り出す
+        document.getElementById('slot_zone').textContent = resultNumber;
+
+        // ログに追加
+        const logs = document.getElementById("logs");
+        const span = document.createElement("span");
+        span.className = "log-item";
+        span.textContent = resultNumber;
+        logs.appendChild(span);
+    }
+
+    // イベントリスナー
+    document.getElementById('start_animation').addEventListener('click', start_slot);
+    document.getElementById('bingo_botton').addEventListener('click', stop_slot);
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === " " || e.code === "Space") {
+            e.preventDefault(); // スペースキーでのスクロール防止
+            slot_state ? stop_slot() : start_slot();
+        }
     });
-    
-//ブラウザ上の停止ボタンを押した時の動作
-    btn1.addEventListener('click', () => {
-        stop_slot();
-    });
-    
-    function sayHello(){//表示を担う
-        let slot_number = Math.floor(Math.random() * 100);
-        document.getElementById('slot_zone').textContent = slot_number;
-        audio.play();
-        timerId = setTimeout(sayHello,refleshlate);
-    }
 
-    function bingo_main(){//ビンゴのメイン処理
-        if(bingo_array[index] === undefined){//今の抽選結果
-            alert("抽選終了！");
-        }
-        else{//当選済みの数字の追加
-            const bingo_log_base = document.getElementById("logs");
-            const bingo_log_element = document.createElement("result");
-            const textnode = document.createTextNode(bingo_array[index]);
-            bingo_log_element.appendChild(textnode);
-            bingo_log_base.appendChild(bingo_log_element);
-        }
-        document.getElementById('slot_zone').textContent = bingo_array[index];
-        before_bingo = bingo_array[index];
-        bingo_array.shift();
-    }
- 
-//関数の外
-    document.getElementById("slot_zone").innerHTML = 'OK!';
-    window.onload = randomizing();// 自動実行
-    </script>
-    <style>
-        *{
-            font-family: "Nikukyu";
-            background-color: #18233F;
-            text-align: center;
-        }
-        .text-outline{
-          text-shadow: 
-            -1px -1px 0 #FFFFFF,
-            1px -1px 0 #FFFFFF,
-            -1px 1px 0 #FFFFFF,
-            1px 1px 0 #FFFFFF;
-        }
-        #slot_zone{
-          font-size: 200px;
-          color: black;
-          border-radius: 40px;        
-          background-color: #FFC93C;
-          font-weight: bold;
-          text-shadow: 
-            -3px -3px 0 #FFFFFF,
-            3px -3px 0 #FFFFFF,
-            -3px 3px 0 #FFFFFF,
-            3px 3px 0 #FFFFFF;
-        }
-        button{
-            padding: 20px;
-            border-radius: 10px;
-        }
-        #start_animation{
-            background-color: cornflowerblue;
-        }
-        #bingo_botton{
-            background-color: deeppink;
-        }
-
-        result{
-            font-size: 80px;
-            display: inline-block;
-            margin-left: 10px;
-            padding: 12px;
-            color: black;
-            background-color: #FFC93C;
-            border-radius: 40px;
-            font-weight: bold;
-        }
-
-    </style>
+    // 初期実行
+    window.onload = initializeBingo;
+</script>
+</body>
 </html>
