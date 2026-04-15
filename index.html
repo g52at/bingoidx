@@ -88,14 +88,20 @@
         sayHello();
     }
 
-    function stop_slot() {
+function stop_slot() {
         if (!slot_state) return;
         slot_state = false;
         
         clearTimeout(timerId);
+
+        // ドラムロールを止めてリセット
         audio.pause();
         audio.currentTime = 0;
-        audio2.play();
+
+        // 「じゃーん」を再生（リセットしてから再生するのがコツ！）
+        audio2.pause();        // 一旦止める（念のため）
+        audio2.currentTime = 0; // 再生位置を最初に戻す
+        audio2.play().catch(e => console.error("再生に失敗しました:", e));
 
         bingo_main();
     }
